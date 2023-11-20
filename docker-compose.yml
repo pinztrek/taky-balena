@@ -1,0 +1,34 @@
+version: "2"
+volumes:
+  shared-data:
+services:
+  taky-cot:
+    build: .
+    container_name: taky-cot
+    ports:
+        - 8087:8087
+        - 8089:8089
+    restart: unless-stopped
+    volumes:
+        - shared-data:/data
+
+    labels:
+        io.balena.features.supervisor-api: '1'
+
+    entrypoint: "/usr/local/bin/start-taky.sh"
+
+  taky-data:
+    build: .
+    container_name: taky-dps
+    user: tak
+    ports:
+        - 8080:8080
+        - 8443:8443
+    restart: unless-stopped
+    depends_on:
+        - taky-cot
+    volumes:
+        - shared-data:/data
+
+    #entrypoint: "cd /data/taky && /usr/local/bin/taky_dps"
+    entrypoint: "/usr/local/bin/start-taky_dps.sh"
